@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for account in accounts %}
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if account.profile_image %}
+                    <img src="{{ account.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                {% else %}
+                    <img src="/media/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                {% endif %}
+                <h3 class="card-title"><a style="text-decoration: none" href="{% url 'profile' username=account.username %}">{{ account.get_full_name }} ({{ account.username }})</a></h3>
+                <p class="text-muted">
+                Был в сети {% if account.last_login %}{{ account.last_login }}
+                {% else %}{{ account.date_joined }}{% endif %}
+                </p>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-center">Ни одного полдьзователя не найдено</p>
+    {% endfor %}
+{% endblock %}

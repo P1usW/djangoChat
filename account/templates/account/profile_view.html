@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+        <div class="card">
+            <div class="card-body">
+                {% if account.profile_image %}
+                    <img src="{{ account.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                {% else %}
+                    <img src="/media/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                {% endif %}
+                <h3 class="card-title">{{ account.get_full_name }}</h3>
+                <p class="text-muted">
+                Был в сети {% if account.last_login %}{{ account.last_login }}
+                {% else %}{{ account.date_joined }}{% endif %}
+                </p>
+                {% if account.about_me %}
+                    <p class="card-text">{{ account.about_me }}</p>
+                {% else %}
+                    <p class="card-text text-muted">Пока здесь пусто...</p>
+                {% endif %}
+            </div>
+        </div>
+        {% if account.facebook or account.twitter or account.instagram %}
+        <div class="card my-4">
+            <div class="card-body">
+                {% if account.facebook %}
+                    <p class="card-text">Facebook: {{ account.facebook }}</p>
+                {% endif %}
+                {% if account.twitter %}
+                    <p class="card-text">Twitter: {{ account.twitter }}</p>
+                {% endif %}
+                {% if account.instagram %}
+                    <p class="card-text">Instagram: {{ account.instagram }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+{% endblock %}
+
+{% block dop_content %}
+    <div class="d-grid gap-2">
+        {% if user != account and not check_request %}
+            <button class="btn btn-outline-primary" id="addOrCanselFriend" onclick="sendFriendRequest({{ account.pk }})">Добавить в друзья</button>
+        {% elif user != account and check_request %}
+            <button class="btn btn-outline-danger" id="addFriend" onclick="sendFriendRequest({{ account.pk }})">Удалить из друзей</button>
+        {% else %}
+            <a class="btn btn-outline-primary">Ещё...</a>
+        {% endif %}
+    </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script>
+    function sendFriendRequest(user_id){
+        payload = {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+			"receiver_user_id": user_id,
+        }
+        let elem = document.getElementById('addOrCanselFriend');
+        if (elem.classList.contains('btn-outline-primary')){
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: "{% url 'send_friend_request' %}",
+                timeout: 5000,
+                data: payload,
+                success: function (data){
+                    if (data['response'] === '1'){
+                            elem.classList.remove('btn-outline-primary');
+                            elem.classList.add('btn-outline-danger');
+                            elem.innerText = "Отменить";
+                    }
+                },
+                error: function (data){
+                    console.error('Error');
+                }
+            })
+        } else {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: "{% url 'cancel_friend_request' %}",
+                timeout: 5000,
+                data: payload,
+                success: function (data){
+                    if (data['response'] === '1'){
+                            elem.classList.remove('btn-outline-danger');
+                            elem.classList.add('btn-outline-primary');
+                            elem.innerText = "Добавить в друзья"
+                    }
+                },
+                error: function (data){
+                    console.error('Error')
+                }
+            })
+        }
+
+    }
+</script>
+{% endblock %}
