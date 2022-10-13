@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 
 from .forms import UserRegister, UserLogin, ProfileEdit, PasswordEdit
-from .models import Account, FriendRequest
+from .models import Account, FriendRequest, FriendList
 from django.conf import settings
 
 from django.http import HttpResponse
@@ -16,7 +16,6 @@ def profile_view(request, username):
     if user := request.user != account:
         try:
             friend_request = FriendRequest.objects.get(sender=user, receiver=account)
-            print(friend_request)
             if friend_request.is_active:
                 context['check_request'] = True
             else:
@@ -27,26 +26,31 @@ def profile_view(request, username):
     return render(request, template_name='account/profile_view.html', context=context)
 
 
-def friend_list_view(request, username):
-    account = Account.objects.filter(username=username).select_related('user').get()
-    friend_list = account.user.friends.all()
-    context = {'friend_list': friend_list}
-    return render(request, template_name='account/friend_list_view.html', context=context)
+def friend_list_view(request):
+    try:
+        account = FriendList.objects.prefetch_related('friends').get(user=request.user)
+        friend_list = account.friends.all()
+        context = {'friend_list': friend_list,
+                   'account': account,
+                   }
+        return render(request, template_name='account/friend_list_view.html', context=context)
+    except Account.DoesNotExist:
+        messages.error(request, 'Вы не можете просматривать список друхеуй несуществующего пользователя')
+        return redirect('home')
 
 
 def friend_request_view(request):
-    if request.user.is_authenticated:
+    user = request.user
+    if not user.is_authenticated:
         messages.info(request, 'Войдите в профиль, чтобы просматривать заявки в друзья')
         return redirect('login')
-    try:
-        friend_request = FriendRequest.objects.get(receiver=request.user)
-    except FriendRequest.DoesNotExist:
-        friend_request = False
+    friend_requests_all = FriendRequest.objects.prefetch_related('sender').filter(receiver=user.pk)
+    print(friend_requests_all)
+    friend_requests = [user.sender for user in friend_requests_all]
     context = {
-        'friend_request': friend_request,
+        'friend_requests': friend_requests,
     }
-    if friend_request:
-        return render(request, template_name='', context=context)
+    return render(request, template_name='account/friend_request_view.html', context=context)
 
 
 def send_friend_request(request):
@@ -106,6 +110,31 @@ def cancel_friend_request(request, *args, **kwargs):
         # should never happen
         payload['response'] = "-1"
     return HttpResponse(json.dumps(payload), content_type="application/json")
+
+
+def delete_friend_request(request):
+    """
+    Если друг удалён из списка: 1
+    Если пользователь не был в списке друзей: 0
+    произошла ошибка: -1
+    """
+    user = request.user
+    payload = {}
+    if request.method == 'POST' and user.is_authenticated:
+        user_id = request.POST.get('friend_id')
+        if user_id:
+            try:
+                friend = Account.objects.get(pk=user_id)
+                friend_list = FriendList.objects.get(user=user)
+                friend_list.remove_friend(friend)
+                payload['response'] = '1'
+            except Account.DoesNotExist:
+                payload['response'] = '-1'
+        else:
+            payload['response'] = '-1'
+    else:
+        payload['response'] = '-1'
+    return HttpResponse(json.dumps(payload), content_type='application/json')
 
 
 def profile_edit_view(request, *args, **kwargs):

@@ -2,14 +2,14 @@
 
 {% block content %}
     {% for friend in friend_list %}
-        <div class="card my-3">
+        <div class="card mb-3">
             <div class="card-body">
                 {% if friend.profile_image %}
                     <img src="{{ friend.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
                 {% else %}
                     <img src="/media/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
                 {% endif %}
-                <h3 class="card-title">{{ friend.get_full_name }}</h3>
+                <h3 class="card-title"><a style="text-decoration: none" href="{% url 'profile' username=friend.username %}">{{ friend.get_full_name }} ({{ friend.username }})</a></h3>
                 <p class="text-muted">
                 Был в сети {% if friend.last_login %}{{ friend.last_login }}
                 {% else %}{{ friend.date_joined }}{% endif %}
@@ -17,4 +17,8 @@
             </div>
         </div>
     {% endfor %}
+{% endblock %}
+
+{% block dop_content %}
+    {% include 'account/_dop_bar/_dop_bar_friend_list.html' %}
 {% endblock %}
