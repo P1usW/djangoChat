@@ -39,9 +39,11 @@
 
 {% block dop_content %}
     <div class="d-grid gap-2">
-        {% if user != account and not check_request %}
+        {% if user != account and check_request == 3 %}
             <button class="btn btn-outline-primary" id="addOrCanselFriend" onclick="sendFriendRequest({{ account.pk }})">Добавить в друзья</button>
-        {% elif user != account and check_request %}
+        {% elif user != account and check_request == 2 %}
+            <button class="btn btn-outline-danger" id="cancelFriend" onclick="sendFriendRequest({{ account.pk }})">Отменить</button>
+        {% elif user != account and check_request == 1 %}
             <button class="btn btn-outline-danger" id="removeFriend" onclick="sendFriendRequest({{ account.pk }})">Удалить из друзей</button>
         {% else %}
             <a class="btn btn-outline-primary">Ещё...</a>
@@ -94,7 +96,5 @@
             })
         }
     }
-
-
 </script>
 {% endblock %}
