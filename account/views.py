@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.conf import settings
+from django.urls import reverse
+
+from urllib.parse import urlencode
 
 from .forms import UserRegister, UserLogin, ProfileEdit, PasswordEdit
 from .models import Account
@@ -41,7 +44,10 @@ def profile_view(request, username):
 
 def profile_edit_view(request, *args, **kwargs):
     if not request.user.is_authenticated:
-        return redirect('login')
+        base_url = reverse('login')
+        add_next = urlencode({'next': '/edit'})
+        url = f'{base_url}?{add_next}'
+        return redirect(url)
 
     username = request.user.username
     user = Account.objects.get(username=username)
@@ -91,7 +97,10 @@ def profile_edit_view(request, *args, **kwargs):
 
 def password_edit_view(request):
     if not request.user.is_authenticated:
-        redirect('login')
+        base_url = reverse('login')
+        add_next = urlencode({'next': '/security'})
+        url = f'{base_url}?{add_next}'
+        return redirect(url)
 
     if request.method == 'POST':
         form = PasswordEdit(data=request.POST, user=request.user)

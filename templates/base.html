@@ -27,21 +27,21 @@
                     {% endblock %}
                 </div>
                 <div class="col-sm-2">
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.tags == 'error' %}
+                                <div class="alert alert-warning" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-{{ message.tags }}" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <hr>
+                    {% endif %}
                     {% block dop_content %}
-                        {% if messages %}
-                            {% for message in messages %}
-                                {% if message.tags == 'error' %}
-                                    <div class="alert alert-warning" role="alert">
-                                        {{ message }}
-                                    </div>
-                                {% else %}
-                                    <div class="alert alert-{{ message.tags }}" role="alert">
-                                        {{ message }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                            <hr>
-                        {% endif %}
                         <div class="d-grid gap-2">
                             <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Новости сайта</button>
                         </div>
