@@ -34,6 +34,7 @@ def chat_room(request, room_name):
 
 
 def private_chat_room_view(request):
+    context = {}
     room_id = request.GET.get('room_id')
     user = request.user
     if not user.is_authenticated:
@@ -43,7 +44,6 @@ def private_chat_room_view(request):
         url = f'{base_url}?{add_next}'
         return redirect(url)
 
-    context = {}
     context['m_and_f'] = get_recent_chatroom_messages(user)
 
     if room_id:

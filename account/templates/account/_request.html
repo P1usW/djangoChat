@@ -1,0 +1,47 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script>
+    function sendFriendRequest(user_id){
+        payload = {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+			"receiver_user_id": user_id,
+        }
+        let elem = document.getElementById('addOrCanselFriend');
+        if (elem.classList.contains('btn-outline-primary')){
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: "{% url 'send_friend_request' %}",
+                timeout: 5000,
+                data: payload,
+                success: function (data){
+                    if (data['response'] === '1'){
+                            elem.classList.remove('btn-outline-primary');
+                            elem.classList.add('btn-outline-danger');
+                            elem.innerText = "Отменить";
+                    }
+                },
+                error: function (data){
+                    console.error('Error');
+                }
+            })
+        } else {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: "{% url 'cancel_friend_request' %}",
+                timeout: 5000,
+                data: payload,
+                success: function (data){
+                    if (data['response'] === '1'){
+                            elem.classList.remove('btn-outline-danger');
+                            elem.classList.add('btn-outline-primary');
+                            elem.innerText = "Добавить в друзья"
+                    }
+                },
+                error: function (data){
+                    console.error('Error')
+                }
+            })
+        }
+    }
+</script>

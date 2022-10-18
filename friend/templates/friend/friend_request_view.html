@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for friend_request in friend_requests %}
+        <div class="card mb-3">
+            <div class="card-body">
+                {% if friend_request.profile_image %}
+                    <img src="{{ friend_request.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                {% else %}
+                    <img src="/media/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                {% endif %}
+                <h3 class="card-title"><a style="text-decoration: none" href="#">{{ friend_request.get_full_name }} ({{ friend_request.username }})</a></h3>
+                <p class="text-muted">
+                Был в сети {% if friend_request.last_login %}{{ friend_request.last_login }}
+                {% else %}{{ friend_request.date_joined }}{% endif %}
+                </p>
+                <div class="my-2">
+                    <button class="btn btn-outline-primary mx-2" id="addOrCanselFriend" onclick="acceptFriendRequest({{ friend_request.pk }})">Принять заявку</button>
+                    <button class="btn btn-outline-danger" id="removeFriend" onclick="declineFriendRequest({{ friend_request.pk }})">Отклонить заявку</button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% include 'account/_request.html' %}
+{% endblock %}
+
+
+{% block dop_content %}
+    {% include 'friend/_dop_bar/_dop_bar_friend_list.html' %}
+{% endblock %}
