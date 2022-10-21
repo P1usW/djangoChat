@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% load chat_room_tags %}
+    {% for value in m_and_f %}
+        {% show_room value %}
+    {% endfor %}
+{% endblock %}
+
+{% block dop_content %}
+
+{% endblock %}

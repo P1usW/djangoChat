@@ -19,8 +19,6 @@ class FriendList(models.Model):
         :param account:
         :return:
         """
-        print(self)
-        print(account)
         if not account in self.friends.all() and self == account:
             self.friends.add(account)
             self.save()

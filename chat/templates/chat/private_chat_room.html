@@ -5,12 +5,59 @@
     <input id="chat-message-input" type="text" size="100" class="form-control" placeholder="Сообщение..."/><br/>
     <input id="chat-message-submit" type="button" value="Отправить" class="form-control"/>
 
+
+{% endblock %}
+
+{% block dop_content %}
+    Имя комнаты: {{ room_name_json }}
+    Количество участников:
+    Имена участников:
+{% endblock %}
 <script>
+    var roomId = null
+    var chatSocket = null
     var roomName = {{ room_name_json }};
 
-    var chatSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+    onStart()
 
+    function onStart(){
+{#        {% if m_and_f %}#}
+{#            createOrReturnPrivateChat('{{ m_and_f }}')#}
+    }
+
+	function createOrReturnPrivateChat(id){
+		payload = {
+			"csrfmiddlewaretoken": "{{ csrf_token }}",
+			"user2_id": id,
+		}
+		$.ajax({
+			type: 'POST',
+			dataType: "json",
+			url: "{% url 'create-or-return-private-chat' %}", // production
+			data: payload,
+			timeout: 5000,
+			success: function(data) {
+				console.log("SUCCESS", data)
+				if(data['response'] === "Successfully got the chat."){
+					setupWebSocket(data['chatroom_id'])
+				}
+				else if(data['response'] != null){
+					alert(data['response'])
+				}
+			},
+			error: function(data) {
+				console.error("ERROR...", data)
+				alert("Something went wrong.")
+			},
+		});
+	}
+
+
+
+
+
+
+    chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
     chatSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);
         var message = data['message'];
@@ -41,10 +88,3 @@
         messageInputDom.value = '';
     };
 </script>
-{% endblock %}
-
-{% block dop_content %}
-    Имя комнаты: {{ room_name_json }}
-    Количество участников:
-    Имена участников:
-{% endblock %}

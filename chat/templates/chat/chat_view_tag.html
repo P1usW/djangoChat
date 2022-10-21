@@ -1,0 +1,13 @@
+{% load static %}
+<div class="card mb-3">
+    <div class="card-body">
+        {% if friend.profile_image %}
+            <img src="{{ friend.profile_image.url }}" class="round-img float-start" alt="/media/default_images/non_images.jpg">
+        {% else %}
+            <img src="{% static 'default_images/non_images.jpg' %}" class="round-img float-start" alt="/media/default_images/non_images.jpg">
+        {% endif %}
+        <h3 class="card-title">{{ friend.get_full_name }} ({{ friend.username }})</h3>
+        <p class="text-muted"></p>
+        <a class="btn btn-light" href="{% url 'private_chat' user_id=friend.pk %}">Перейти к диалогу</a>
+    </div>
+</div>

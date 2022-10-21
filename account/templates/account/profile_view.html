@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
         <div class="card">
@@ -6,7 +7,7 @@
                 {% if account.profile_image %}
                     <img src="{{ account.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
                 {% else %}
-                    <img src="/media/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                    <img src="{% static 'default_images/non_images.jpg' %}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
                 {% endif %}
                 <h3 class="card-title">{{ account.get_full_name }}</h3>
                 <p class="text-muted">
@@ -39,6 +40,9 @@
 
 {% block dop_content %}
     <div class="d-grid gap-2">
+        {% if user != account %}
+            <a class="btn btn-outline-primary" href="{% url 'private_chat' user_id=account.pk %}">Написать сообщение</a>
+        {% endif %}
         {% if user != account and check_request == 3 %}
             <button class="btn btn-outline-primary" id="addOrCanselFriend" onclick="sendFriendRequest({{ account.pk }})">Добавить в друзья</button>
         {% elif user != account and check_request == 2 %}

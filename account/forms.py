@@ -45,7 +45,7 @@ class UserRegister(UserCreationForm):
         }
 
 
-class UserLogin(forms.Form):
+class UserLogin(AuthenticationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}),
                                help_text='')
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}),

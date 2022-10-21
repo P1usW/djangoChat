@@ -7,7 +7,7 @@
                 {% if friend_request.profile_image %}
                     <img src="{{ friend_request.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
                 {% else %}
-                    <img src="/media/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                    <img src="/media_root/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
                 {% endif %}
                 <h3 class="card-title"><a style="text-decoration: none" href="#">{{ friend_request.get_full_name }} ({{ friend_request.username }})</a></h3>
                 <p class="text-muted">

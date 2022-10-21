@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.utils.safestring import mark_safe
 from django.urls import reverse
 from django.http import HttpResponse
+from django.db.models import Q
 from account.models import Account
 from friend.models import FriendList
 
@@ -24,43 +24,70 @@ def chat_room(request, room_name):
     if not request.user.is_authenticated:
         messages.error(request, 'Ввойдите в систему, чтобы присоединиться к чату')
         base_url = reverse('login')
-        add_next = urlencode({'next': '/security'})
+        add_next = urlencode({'next': f'/{room_name}'})
         url = f'{base_url}?{add_next}'
         return redirect(url)
 
     return render(request, 'chat/chat_room.html', {
-        'room_name_json': mark_safe(json.dumps(room_name)),
+        'room_name_json': room_name,
     })
 
 
-def private_chat_room_view(request):
+def private_chat_room_view(request, user_id):
+    user = request.user
+    friend = Account.objects.get(pk=user_id)
+
+    if not request.user.is_authenticated:
+        messages.error(request, 'Ввойдите в систему, чтобы присоединиться к чату')
+        base_url = reverse('login')
+        add_next = urlencode({'next': '/security'})
+        url = f'{base_url}?{add_next}'
+        return redirect(url)
+
+    try:
+        friend_list = FriendList.objects.get(user=user)
+        if not friend_list.is_mutual_fiend(friend):
+            return redirect('home')
+    except FriendList.DoesNotExist:
+        return redirect('home')
+
+    try:
+        room = PrivateChatRoom.objects.get(user1=user, user2=friend)
+    except PrivateChatRoom.DoesNotExist:
+        try:
+            room = PrivateChatRoom.objects.get(user1=friend, user2=user)
+        except PrivateChatRoom.DoesNotExist:
+            room = PrivateChatRoom(user1=user, user2=friend, is_active=True)
+            room.save()
+
+    context = {
+        'friend': friend,
+        'room': room,
+    }
+    return render(request, template_name='chat/private_chat_room.html', context=context)
+
+
+def all_private_chat_room_view(request):
     context = {}
-    room_id = request.GET.get('room_id')
     user = request.user
     if not user.is_authenticated:
         messages.error(request, 'Ввойдите в систему, чтобы присоединиться к чату')
         base_url = reverse('login')
-        add_next = urlencode({'next': f'/private_chat/?room_id={room_id}'})
+        add_next = urlencode({'next': f'/private_chat'})
         url = f'{base_url}?{add_next}'
         return redirect(url)
 
     context['m_and_f'] = get_recent_chatroom_messages(user)
 
-    if room_id:
-        context["room_id"] = room_id
-
-    return render(request, 'chat/private_chat_room.html', context=context)
+    return render(request, 'chat/all_private_chat_room_view.html', context=context)
 
 
 def get_recent_chatroom_messages(user):
-    rooms1 = PrivateChatRoom.objects.filter(user1=user, is_active=True)
-    rooms2 = PrivateChatRoom.objects.filter(user2=user, is_active=True)
-
-    rooms = list(chain(rooms1, rooms2))
-
+    rooms = PrivateChatRoom.objects.prefetch_related('user1', 'user2').filter((Q(user1=user) | Q(user2=user)),
+                                                                              is_active=True)
     m_and_f = []
     for room in rooms:
-        if room.user == user:
+        if room.user1 == user:
             friend = room.user2
         else:
             friend = room.user1
@@ -92,7 +119,7 @@ def get_recent_chatroom_messages(user):
                 )
             m_and_f.append({
                 'message': message,
-                'friend': friend
+                'friend': friend,
             })
     return sorted(m_and_f, key=lambda x: x['message'].timestamp, reverse=True)
 
@@ -112,7 +139,7 @@ def create_or_return_private_chat(request):
                 user2 = Account.objects.get(pk=user2_id)
                 chat = find_or_create_private_chat(user1, user2)
                 payload['response'] = '1'
-                payload['chat_if'] = chat.id
+                payload['chat_id'] = chat.id
             except Account.DoesNotExist:
                 payload['response'] = '0'
     else:
