@@ -11,3 +11,27 @@
     border-radius: 50%;
     box-shadow: 1px 1px 5px #666;
 }
+
+.chat-log {
+		overflow-x: hidden;
+		overflow-y: auto;
+		padding: 10px;
+		/*background-color: #fff;*/
+		font-size: 0.9em;
+		flex-direction: column-reverse;
+        border: solid #212529 1px;
+}
+
+
+.chat-logs {
+    color: red;
+    width: 450px;
+    height: 450px;
+    margin: 100px;
+    padding: 50px;
+    border: 5px solid #ff0000;
+    box-sizing: border-box;
+    background-image: radial-gradient(#f69d3c, #3f87a6);
+    background-repeat: no-repeat;
+    background-position:top ;
+}

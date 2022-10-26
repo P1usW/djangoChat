@@ -20,16 +20,16 @@ def chat_search(request):
     return render(request, 'chat/chat_search.html', {})
 
 
-def chat_room(request, room_name):
+def chat_room(request, room_id):
     if not request.user.is_authenticated:
         messages.error(request, 'Ввойдите в систему, чтобы присоединиться к чату')
         base_url = reverse('login')
-        add_next = urlencode({'next': f'/{room_name}'})
+        add_next = urlencode({'next': f'/chat/{room_id}'})
         url = f'{base_url}?{add_next}'
         return redirect(url)
 
     return render(request, 'chat/chat_room.html', {
-        'room_name_json': room_name,
+        'room_id_json': room_id,
     })
 
 
@@ -47,7 +47,7 @@ def private_chat_room_view(request, user_id):
     try:
         friend_list = FriendList.objects.get(user=user)
         if not friend_list.is_mutual_fiend(friend):
-            return redirect('home')
+            return redirect('list')
     except FriendList.DoesNotExist:
         return redirect('home')
 

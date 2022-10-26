@@ -49,7 +49,6 @@ def send_friend_request(request):
                 friend_request = FriendRequest.objects.get(sender=user, receiver=receiver)
                 if friend_request.is_active:
                     payload['response'] = '0'
-
                 else:
                     friend_request.is_active = True
                     friend_request.save()

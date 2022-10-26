@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <textarea id="chat-log" cols="100" rows="20" class="form-control"></textarea><br/>
+    <textarea id="chat-log" cols="100" rows="20" class="form-control" readonly></textarea><br/>
     <input id="chat-message-input" type="text" size="100" class="form-control" placeholder="Сообщение..."/><br/>
     <input id="chat-message-submit" type="button" value="Отправить" class="form-control"/>
 
 <script>
-    var roomName = {{ room_name_json }};
+    var roomId = {{ room_id_json }};
 
     var chatSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+        'ws://' + window.location.host + '/ws/chat/' + roomId + '/');
 
     chatSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);

@@ -27,6 +27,9 @@ class PrivateChatRoom(models.Model):
     def group_name(self):
         return f"PrivateChatRoom-{self.id}"
 
+    def __str__(self):
+        return f"PrivateChatRoom-{self.id}"
+
 
 class RoomChatMessageManager(models.Manager):
     def by_room(self, room):
@@ -39,7 +42,7 @@ class PrivateRoomChatMessage(models.Model):
     Chat message created by a user inside a Room
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    room = models.ForeignKey(PrivateChatRoom, on_delete=models.CASCADE)
+    room = models.ForeignKey(PrivateChatRoom, on_delete=models.CASCADE, related_name='private_messages')
     timestamp = models.DateTimeField(auto_now_add=True)
     content = models.TextField(unique=False, blank=False,)
 
