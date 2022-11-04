@@ -13,52 +13,50 @@
 </head>
 <body>
     {% include '_nav/navbar.html' %}
-    <main>
-        <div class="container my-3">
-            <div class="row">
-                <div class="col-sm-2">
-                    {% block side_bar %}
-                        {% if user.is_authenticated %}
-                            {% include '_side_bar/side_bar.html' %}
-                        {% endif %}
-                    {% endblock %}
-                </div>
+    <div class="container my-3">
+        <div class="row">
+            <div class="col-sm-2">
+                {% block side_bar %}
+                    {% if user.is_authenticated %}
+                        {% include '_side_bar/side_bar.html' %}
+                    {% endif %}
+                {% endblock %}
+            </div>
                 <div class="col-sm-8 text-center">
                     {% block content %}
                     {% endblock %}
                 </div>
-                <div class="col-sm-2">
-                    {% if messages %}
-                        {% for message in messages %}
-                            {% if message.tags == 'error' %}
-                                <div class="alert alert-warning" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% else %}
-                                <div class="alert alert-{{ message.tags }}" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                        <hr>
-                    {% endif %}
-                    {% block dop_content %}
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Новости сайта</button>
-                        </div>
-                        <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
-                            <div class="offcanvas-header">
-                                <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Фон с прокруткой</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+            <div class="col-sm-2">
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'error' %}
+                            <div class="alert alert-warning" role="alert">
+                                {{ message }}
                             </div>
-                            <div class="offcanvas-body">
-                                <p>Попробуйте прокрутить оставшуюся часть страницы, чтобы увидеть эту опцию в действии.</p>
+                        {% else %}
+                            <div class="alert alert-{{ message.tags }}" role="alert">
+                                {{ message }}
                             </div>
+                        {% endif %}
+                    {% endfor %}
+                    <hr>
+                {% endif %}
+                {% block dop_content %}
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Новости сайта</button>
+                    </div>
+                    <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Фон с прокруткой</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
                         </div>
-                    {% endblock %}
-                </div>
+                        <div class="offcanvas-body">
+                            <p>Попробуйте прокрутить оставшуюся часть страницы, чтобы увидеть эту опцию в действии.</p>
+                        </div>
+                    </div>
+                {% endblock %}
             </div>
         </div>
-    </main>
+    </div>
 </body>
 </html>

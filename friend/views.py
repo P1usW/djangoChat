@@ -25,10 +25,10 @@ def friend_request_view(request):
     if not user.is_authenticated:
         messages.info(request, 'Войдите в профиль, чтобы просматривать заявки в друзья')
         return redirect('login')
-    friend_requests_all = FriendRequest.objects.prefetch_related('sender').filter(receiver=user.pk)
-    friend_requests = [user.sender for user in friend_requests_all]
+    friend_requests_all = FriendRequest.objects.prefetch_related('sender').filter(receiver=user.pk, is_active=True)
+    friend_requests_accounts = [user.sender for user in friend_requests_all]
     context = {
-        'friend_requests': friend_requests,
+        'friend_requests_accounts': friend_requests_accounts,
     }
     return render(request, template_name='friend/friend_request_view.html', context=context)
 
@@ -77,8 +77,6 @@ def cancel_friend_request(request, *args, **kwargs):
             receiver = Account.objects.get(pk=user_id)
             try:
                 friend_requests = FriendRequest.objects.get(sender=user, receiver=receiver, is_active=True)
-                # There should only ever be ONE active friend request at any given time. Cancel them all just in case.
-                # found the request. Now cancel it
                 friend_requests.cancel()
                 payload['response'] = "1"
             except FriendRequest.DoesNotExist:
@@ -86,31 +84,72 @@ def cancel_friend_request(request, *args, **kwargs):
         else:
             payload['response'] = "-1"
     else:
-        # should never happen
         payload['response'] = "-1"
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
 
-def delete_friend_request(request):
-    """
-    Если друг удалён из списка: 1
-    Если пользователь не был в списке друзей: 0
-    произошла ошибка: -1
-    """
+def accept_friend_request(request):
     user = request.user
     payload = {}
     if request.method == 'POST' and user.is_authenticated:
-        user_id = request.POST.get('friend_id')
-        if user_id:
+        account_id = request.POST.get('account_id')
+        if account_id:
             try:
-                friend = Account.objects.get(pk=user_id)
-                friend_list = FriendList.objects.get(user=user)
-                friend_list.remove_friend(friend)
-                payload['response'] = '1'
-            except Account.DoesNotExist:
-                payload['response'] = '-1'
+                friend_request = FriendRequest.objects.get(sender_id=account_id)
+                if friend_request.receiver == user:
+                    friend_request.accept()
+                    payload['response'] = 'accept'
+                else:
+                    payload['response'] = 'error'
+            except FriendRequest.DoesNotExist:
+                payload['response'] = 'error'
         else:
-            payload['response'] = '-1'
+            payload['response'] = 'error'
     else:
-        payload['response'] = '-1'
+        payload['error'] = 'error'
+    return HttpResponse(json.dumps(payload), content_type='application/json')
+
+
+def decline_friend_request(request):
+    user = request.user
+    payload = {}
+    if request.method == 'POST' and user.is_authenticated:
+        account_id = request.POST.get('account_id')
+        if account_id:
+            try:
+                friend_request = FriendRequest.objects.get(sender_id=account_id)
+                if friend_request.receiver == user:
+                    friend_request.decline()
+                    payload['response'] = 'decline'
+                else:
+                    payload['response'] = 'error'
+            except FriendRequest.DoesNotExist:
+                payload['response'] = 'error'
+        else:
+            payload['response'] = 'error'
+    else:
+        payload['error'] = 'error'
+    return HttpResponse(json.dumps(payload), content_type='application/json')
+
+
+def delete_friend(request):
+    user = request.user
+    payload = {}
+    if request.method == 'POST' and user.is_authenticated:
+        friend_id = request.POST.get('friend_id')
+        if friend_id:
+            try:
+                friend = Account.objects.get(pk=friend_id)
+                friend_friend_list = FriendList.objects.get(user=friend)
+                friend_friend_list.remove_friend(user)
+
+                user_friend_list = FriendList.objects.get(user=user)
+                user_friend_list.remove_friend(friend)
+                payload['response'] = 'deleted'
+            except Account.DoesNotExist:
+                payload['response'] = 'error'
+        else:
+            payload['response'] = 'error'
+    else:
+        payload['response'] = 'error'
     return HttpResponse(json.dumps(payload), content_type='application/json')

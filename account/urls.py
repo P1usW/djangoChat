@@ -10,5 +10,6 @@ urlpatterns = [
     path('edit', views.profile_edit_view, name='edit'),
     path('security', views.password_edit_view, name='security'),
     path('search', views.profile_search, name='search'),
+    path('support', views.support_view, name='support'),
     path('<str:username>', views.profile_view, name='profile'),
 ]

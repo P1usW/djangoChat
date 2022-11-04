@@ -44,11 +44,11 @@
             <a class="btn btn-outline-primary" href="{% url 'private_chat' user_id=account.pk %}">Написать сообщение</a>
         {% endif %}
         {% if user != account and check_request == 3 %}
-            <button class="btn btn-outline-primary" id="addOrCanselFriend" onclick="sendFriendRequest({{ account.pk }})">Добавить в друзья</button>
+            <button class="btn btn-outline-primary" id="addFriend" onclick="sendFriendRequest({{ account.pk }})">Добавить в друзья</button>
         {% elif user != account and check_request == 2 %}
             <button class="btn btn-outline-danger" id="cancelFriend" onclick="sendFriendRequest({{ account.pk }})">Отменить</button>
         {% elif user != account and check_request == 1 %}
-            <button class="btn btn-outline-danger" id="removeFriend" onclick="sendFriendRequest({{ account.pk }})">Удалить из друзей</button>
+            <button class="btn btn-outline-danger" id="deleteFriend" onclick="deleteFriend({{ account.pk }})">Удалить из друзей</button>
         {% else %}
             <a class="btn btn-outline-primary">Ещё...</a>
         {% endif %}
@@ -56,13 +56,42 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script>
+    let accountId = {{ account.pk }};
+
+    function deleteFriend() {
+        payload = {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+			"friend_id": accountId,
+        }
+        let elem = document.getElementById('deleteFriend')
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: "{% url 'delete_friend' %}",
+            timeout: 5000,
+            data: payload,
+            success: function (data){
+                if (data['response'] === 'deleted'){
+                    elem.classList.remove('btn-outline-danger');
+                    elem.classList.add('btn-outline-primary');
+                    elem.innerText = 'Добавить в друзья'
+                    elem.id = 'addFriend'
+                }
+            },
+            error: function (data){
+                console.log('Error')
+            }
+        })
+    }
+
     function sendFriendRequest(user_id){
         payload = {
             "csrfmiddlewaretoken": "{{ csrf_token }}",
 			"receiver_user_id": user_id,
         }
-        let elem = document.getElementById('addOrCanselFriend');
-        if (elem.classList.contains('btn-outline-primary')){
+        let elem = document.getElementById('addFriend') || document.getElementById('cancelFriend');
+
+        if (elem.id === 'addFriend'){
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
@@ -73,14 +102,15 @@
                     if (data['response'] === '1'){
                             elem.classList.remove('btn-outline-primary');
                             elem.classList.add('btn-outline-danger');
-                            elem.innerText = "Отменить";
+                            elem.textContent = "Отменить";
+                            elem.id = "cancelFriend";
                     }
                 },
                 error: function (data){
                     console.error('Error');
                 }
             })
-        } else {
+        } else if (elem.id === 'cancelFriend') {
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
@@ -91,7 +121,8 @@
                     if (data['response'] === '1'){
                             elem.classList.remove('btn-outline-danger');
                             elem.classList.add('btn-outline-primary');
-                            elem.innerText = "Добавить в друзья"
+                            elem.textContent = "Добавить в друзья";
+                            elem.id = "addFriend";
                     }
                 },
                 error: function (data){

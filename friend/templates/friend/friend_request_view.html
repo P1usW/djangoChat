@@ -1,27 +1,81 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% for friend_request in friend_requests %}
-        <div class="card mb-3">
-            <div class="card-body">
-                {% if friend_request.profile_image %}
-                    <img src="{{ friend_request.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
-                {% else %}
-                    <img src="/media_root/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
-                {% endif %}
-                <h3 class="card-title"><a style="text-decoration: none" href="#">{{ friend_request.get_full_name }} ({{ friend_request.username }})</a></h3>
-                <p class="text-muted">
-                Был в сети {% if friend_request.last_login %}{{ friend_request.last_login }}
-                {% else %}{{ friend_request.date_joined }}{% endif %}
-                </p>
-                <div class="my-2">
-                    <button class="btn btn-outline-primary mx-2" id="addOrCanselFriend" onclick="acceptFriendRequest({{ friend_request.pk }})">Принять заявку</button>
-                    <button class="btn btn-outline-danger" id="removeFriend" onclick="declineFriendRequest({{ friend_request.pk }})">Отклонить заявку</button>
+    <div id="friendRequest">
+        {% for account in friend_requests_accounts %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    {% if account.profile_image %}
+                        <img src="{{ account.profile_image.url }}" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                    {% else %}
+                        <img src="/media_root/default_images/non_images.jpg" class="rounded float-start me-3 w-25" alt="/media/default_images/non_images.jpg">
+                    {% endif %}
+                    <h3 class="card-title"><a style="text-decoration: none" href="{% url 'profile' username=account.username %}">{{ account.get_full_name }} ({{ account.username }})</a></h3>
+                    <p class="text-muted">
+                    Был в сети {% if account.last_login %}{{ account.last_login }}
+                    {% else %}{{ account.date_joined }}{% endif %}
+                    </p>
+                    <div class="my-2">
+                        <button class="btn btn-outline-primary mx-2" data-account-pk="{{ account.pk }}" data-action="accept" name="accept-{{ account.pk }}">Принять заявку</button>
+                        <button class="btn btn-outline-danger" data-account-pk="{{ account.pk }}" data-action="decline" name="decline-{{ account.pk }}">Отклонить заявку</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
     {% include 'account/_request.html' %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script>
+        let elem = document.getElementById('friendRequest');
+        if (elem) elem.addEventListener('click', friendRequest);
+
+        function friendRequest(event){
+            let button = event.target.closest('button')
+            if (!button) return
+            let payload = {
+                "csrfmiddlewaretoken": "{{ csrf_token }}",
+                "account_id": +event.target.dataset.accountPk,
+            }
+            let action = event.target.dataset.action
+            if (action === 'accept') {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: "{% url 'accept_friend_request' %}",
+                    timeout: 5000,
+                    data: payload,
+                    success: function (data){
+                        if (data['response'] === 'accept'){
+                            event.target.nextElementSibling.remove()
+                            event.target.remove()
+                        }
+                    },
+                    error: function (data){
+                        console.error('Error');
+                    }
+                })
+            }
+            else if (action === 'decline') {
+                $.ajax({
+                     type: 'POST',
+                     dataType: 'json',
+                     url: "{% url 'decline_friend_request' %}",
+                     timeout: 5000,
+                     data: payload,
+                     success: function (data){
+                         if (data['response'] === 'decline'){
+                             event.target.previousElementSibling.remove()
+                             event.target.remove()
+                         }
+                     },
+                     error: function (data){
+                         console.error('Error');
+                     }
+                })
+            }
+        }
+    </script>
 {% endblock %}
 
 

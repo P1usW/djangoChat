@@ -1,13 +1,16 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
-from django.contrib import messages
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login, logout, authenticate
+# from django.core.mail import send_mail
+# from django.template.loader import render_to_string
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
 from urllib.parse import urlencode
 
-from .forms import UserRegister, UserLogin, ProfileEdit, PasswordEdit
+from .forms import UserRegister, UserLogin, ProfileEdit, PasswordEdit, SupportForm
 from .models import Account
+from .utils import send_async_mail
 from friend.models import FriendList, FriendRequest
 
 
@@ -124,6 +127,56 @@ def password_edit_view(request):
 def home_view(request):
     context = {}
     return render(request, template_name='account/home_view.html', context=context)
+
+
+def support_view(request):
+    user = request.user
+    if not user.is_authenticated:
+        base_url = reverse('login')
+        add_next = urlencode({'next': '/support'})
+        url = f'{base_url}?{add_next}'
+        return redirect(url)
+
+    context = {}
+    if request.method == 'POST':
+        form = SupportForm(user, request.POST)
+        if form.is_valid():
+            # Sync send mail
+            # rendered_message = render_to_string('account/email_message/email_message.html',
+            #                                     context={
+            #                                         'content': form.cleaned_data['content'],
+            #                                         'username': user.username,
+            #                                         'email': user.email,
+            #                                     }
+            #                                     )
+            # result_sending = send_mail(subject='Тема: {}'.format(form.cleaned_data['title']),
+            #           message=form.cleaned_data['content'],
+            #           from_email=None,
+            #           recipient_list=['ivshavrin@gmail.com'],
+            #           html_message=rendered_message
+            #           )
+            # if result_sending:
+            #     form.save()
+            #     messages.success(request, 'Сообщение отправлено.')
+            #     return redirect('home')
+            # else:
+            #     messages.error(request, 'Протзошла ошибка, повторите позже.')
+            #     form = SupportForm(request.POST)
+            #     context['form'] = form
+
+            # Async send mail (Threading)
+            send_async_mail(form, user)
+            form.save()
+            messages.success(request, 'Сообщение отправлено')
+            return redirect('home')
+        else:
+            messages.error(request, 'Произошла ошибка, повторите позже.')
+            form = SupportForm(request.POST)
+            context['form'] = form
+    else:
+        form = SupportForm(user)
+    context['form'] = form
+    return render(request, template_name='account/support_view.html', context=context)
 
 
 def profile_search(request, *args, **kwargs):

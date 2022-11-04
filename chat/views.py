@@ -47,9 +47,9 @@ def private_chat_room_view(request, user_id):
     try:
         friend_list = FriendList.objects.get(user=user)
         if not friend_list.is_mutual_fiend(friend):
-            return redirect('list')
+            return redirect('all_private_chat')
     except FriendList.DoesNotExist:
-        return redirect('home')
+        return redirect('all_private_chat')
 
     try:
         room = PrivateChatRoom.objects.get(user1=user, user2=friend)
@@ -59,7 +59,6 @@ def private_chat_room_view(request, user_id):
         except PrivateChatRoom.DoesNotExist:
             room = PrivateChatRoom(user1=user, user2=friend, is_active=True)
             room.save()
-
     context = {
         'friend': friend,
         'room': room,
@@ -85,14 +84,13 @@ def all_private_chat_room_view(request):
 def get_recent_chatroom_messages(user):
     rooms = PrivateChatRoom.objects.prefetch_related('user1', 'user2').filter((Q(user1=user) | Q(user2=user)),
                                                                               is_active=True)
+    friend_list = FriendList.objects.prefetch_related('friends').get(user=user)
     m_and_f = []
     for room in rooms:
         if room.user1 == user:
             friend = room.user2
         else:
             friend = room.user1
-
-        friend_list = FriendList.objects.get(user=user)
         if not friend_list.is_mutual_fiend(friend):
             chat = find_or_create_private_chat(user, friend)
             chat.is_active = False

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Account
+from .models import Account, SupportMessages
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, AuthenticationForm
 
 
@@ -110,4 +110,34 @@ class PasswordEdit(PasswordChangeForm):
                                     widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     new_password2 = forms.CharField(label='Повторите пароль',
                                     widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+
+class SupportForm(forms.ModelForm):
+    class Meta:
+        model = SupportMessages
+        fields = ('title', 'content')
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+        error_messages = {
+            'title': {
+                'max_length': 'Слишком длинное тема.'
+            },
+            'content': {
+                'max_length': 'Слишком большое сообщение.'
+            }
+        }
+
+    def __init__(self, user, *args, **kwargs):
+        super(SupportForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    def save(self, commit=True):
+        obj = super(SupportForm, self).save(commit=False)
+        obj.user = self.user
+        if commit:
+            obj.save()
+        return obj
+
 

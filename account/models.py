@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.urls import reverse
+from django.conf import settings
 
 
 class AccountManager(UserManager):
@@ -46,3 +47,11 @@ class Account(AbstractUser):
         swappable = "AUTH_USER_MODEL"
 
 
+class SupportMessages(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='support_messages',
+                             verbose_name='Пользователь')
+    title = models.CharField(verbose_name='Тело обращения', max_length=128)
+    content = models.TextField(verbose_name='Сообщение', max_length=2024)
+
+    def __str__(self):
+        return self.title

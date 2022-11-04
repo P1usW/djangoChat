@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.safestring import mark_safe
 
-from .models import Account
+from .models import Account, SupportMessages
 
 
 @admin.register(Account)
@@ -18,3 +18,9 @@ class AccountAdmin(UserAdmin):
             return mark_safe('<img scr="{}" width=70'.format(obj.profile_image.url))
         else:
             return '-'
+
+
+@admin.register(SupportMessages)
+class SupportMessagesAdmin(admin.ModelAdmin):
+    list_display = ('title', 'content', 'user')
+    search_fields = ('title',)

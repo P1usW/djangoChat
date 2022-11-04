@@ -36,19 +36,20 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
-
+        username = self.scope['user'].username
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_id,
             {
                 'type': 'chat_message',
-                'message': message
+                'message': message,
+                'username': username,
             })
 
     # Receive message from room group
     async def chat_message(self, event):
-        username = self.scope['user'].username
-        message = username + ': ' + event['message']
+
+        message = event['username'] + ': ' + event['message']
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
@@ -78,7 +79,8 @@ class PrivateAsyncChatConsumer(AsyncWebsocketConsumer):
             await self.chat_message(text_data['message'])
         elif command == 'get_chat_messages':
             print('Get all messages')
-            await get_chat_messages(self.room, text_data['page_number'])
+            all_messages = await get_chat_messages(self.room, text_data['page_number'])
+            await self.send(json.dumps(all_messages))
         elif command == None:
             print('None')
 
@@ -96,9 +98,6 @@ class PrivateAsyncChatConsumer(AsyncWebsocketConsumer):
         # Add user to "users" list for room
         await connect_user(self.room, self.scope["user"])
 
-        # Store that we're in the room
-        self.room_id = self.room.id
-
         # Add them to the group so they get room messages
         await self.channel_layer.group_add(
             self.group_name,
@@ -107,7 +106,7 @@ class PrivateAsyncChatConsumer(AsyncWebsocketConsumer):
 
         # # Instruct their client to finish opening the room
         # await self.send({
-        #     "join": str(self.room.id),
+        #     "join": str(self.room_id),
         # })
 
     async def leave_room(self, room_id):
@@ -123,7 +122,7 @@ class PrivateAsyncChatConsumer(AsyncWebsocketConsumer):
 
         # # Instruct their client to finish closing the room
         # await self.send({
-        #     "leave": str(self.room.id),
+        #     "leave": str(self.room_id),
         # })
 
     async def chat_message(self, event):
@@ -137,7 +136,6 @@ class PrivateAsyncChatConsumer(AsyncWebsocketConsumer):
             })
 
     async def send_room(self, event):
-        print(event['payload'])
         await self.send(text_data=json.dumps(event['payload']))
 
     async def handle_client_error(self, e):
@@ -173,13 +171,19 @@ def create_room_chat_messages(room, user, messages):
 @database_sync_to_async
 def get_chat_messages(room, page_number=1):
     all_messages_user = PrivateRoomChatMessage.objects.by_room(room)
-    p = Paginator(all_messages_user, 10)
+    p = Paginator(all_messages_user, 20)
     s = LazyRoomChatMessageEncoder()
-    payload = {
-        'type_message': 2,
-        'messages': s.serialize(p.page(page_number).object_list)
-    }
-    return payload
+    if p.num_pages > page_number:
+        payload = {
+            'type_messages': 3,
+        }
+        return payload
+    else:
+        payload = {
+            'type_messages': 2,
+            'messages': s.serialize(p.page(page_number).object_list)
+        }
+        return payload
 
 
 @database_sync_to_async

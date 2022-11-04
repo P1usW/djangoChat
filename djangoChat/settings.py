@@ -35,7 +35,6 @@ AUTHENTICATION_BACKENDS = (
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'chat.apps.ChatConfig',
     'friend.apps.FriendConfig',
+    'community.apps.CommunityConfig',
 ]
 
 MIDDLEWARE = [
@@ -158,3 +158,12 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024 #10mb
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST_USER = 'ivanflaskemail@gmail.com'
+EMAIL_HOST_PASSWORD = 'zbmoevtpnlcwhhwm'
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False
+EMAIL_PORT = 465
+EMAIL_HOST = 'smtp.gmail.com'
