@@ -16,8 +16,8 @@
                     {% else %}{{ account.date_joined }}{% endif %}
                     </p>
                     <div class="my-2">
-                        <button class="btn btn-outline-primary mx-2" data-account-pk="{{ account.pk }}" data-action="accept" name="accept-{{ account.pk }}">Принять заявку</button>
-                        <button class="btn btn-outline-danger" data-account-pk="{{ account.pk }}" data-action="decline" name="decline-{{ account.pk }}">Отклонить заявку</button>
+                        <button class="btn btn-outline-primary mx-2" data-account-pk="{{ account.pk }}" data-action="accept">Принять заявку</button>
+                        <button class="btn btn-outline-danger" data-account-pk="{{ account.pk }}" data-action="decline">Отклонить заявку</button>
                     </div>
                 </div>
             </div>
@@ -31,13 +31,14 @@
         if (elem) elem.addEventListener('click', friendRequest);
 
         function friendRequest(event){
-            let button = event.target.closest('button')
-            if (!button) return
+            let button = event.target.closest('button');
+            if (!button) return;
+            if (!elem.contains(button)) return;
             let payload = {
                 "csrfmiddlewaretoken": "{{ csrf_token }}",
                 "account_id": +event.target.dataset.accountPk,
             }
-            let action = event.target.dataset.action
+            let action = event.target.dataset.action;
             if (action === 'accept') {
                 $.ajax({
                     type: 'POST',

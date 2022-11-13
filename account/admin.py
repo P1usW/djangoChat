@@ -15,7 +15,7 @@ class AccountAdmin(UserAdmin):
     @admin.display(description='Фотография')
     def get_photo(self, obj):
         if obj.profile_image:
-            return mark_safe('<img scr="{}" width=70'.format(obj.profile_image.url))
+            return mark_safe(f'<img src="{obj.profile_image.url}" width="75"')
         else:
             return '-'
 

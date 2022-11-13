@@ -74,12 +74,12 @@
                 if (data['response'] === 'deleted'){
                     elem.classList.remove('btn-outline-danger');
                     elem.classList.add('btn-outline-primary');
-                    elem.innerText = 'Добавить в друзья'
-                    elem.id = 'addFriend'
+                    elem.innerText = 'Добавить в друзья';
+                    elem.id = 'addFriend';
                 }
             },
             error: function (data){
-                console.log('Error')
+                console.log('Error');
             }
         })
     }
@@ -126,7 +126,7 @@
                     }
                 },
                 error: function (data){
-                    console.error('Error')
+                    console.error('Error');
                 }
             })
         }

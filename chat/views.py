@@ -99,7 +99,6 @@ def get_recent_chatroom_messages(user):
             try:
                 message = PrivateRoomChatMessage.objects.filter(room=room, user=friend).latest('timestamp')
             except PrivateRoomChatMessage.DoesNotExist:
-                # create a dummy message with dummy timestamp
                 today = datetime(
                     year=1950,
                     month=1,

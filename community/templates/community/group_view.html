@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ group.name }}</h5>
+            <p class="card-text">{{ group.information }}</p>
+        </div>
+    </div>
+    {% for post in posts %}
+        <div class="card my-4">
+            <div class="card-body">
+                <img class="round-img-mini float-start" src="{{ group.group_image.url }}" alt="{% static 'default_images/non-image-group.png' %}">
+                <h5 class="card-title">{{ group.name }}</h5>
+                <p class="card-text">{{ post.content }}</p>
+                <p class="card-text"><small class="text-muted">{{ post.timestamp }}</small></p>
+            </div>
+        </div>
+    {% empty %}
+
+    {% endfor %}
+{% endblock %}
+
+
+{% block dop_content %}
+    <div class="card">
+        <div class="card-body text-center">
+            <img class="round-img" src="{{ group.group_image.url }}" alt="{% static 'default_images/non-image-group.png' %}">
+            <p class="card-text">Подписчики: {{ group.subscribers.count }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body text-center">
+            <p class="card-text">Модерация:</p>
+
+        </div>
+    </div>
+{% endblock %}

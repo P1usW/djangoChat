@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <ul class="list-group list-group-flush">
+        {% for group in groups %}
+            <li class="list-group-item">
+                <img class="round-img float-start" src="{{ group.group_image.url }}" alt="{% static 'default_images/non-image-group.png' %}">
+                <a href="{% url 'group' uniq_name=group.uniq_name_url %}">{{ group.name }}</a>
+                <p>{{ group.information }}</p>
+                <p>{{ group.subscribers.count }} подписчиков</p>
+            </li>
+        {% empty %}
+            <li>Вы не подписаны ни на одну группу.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

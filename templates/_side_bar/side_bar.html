@@ -2,6 +2,6 @@
   <a class="list-group-item" href="{% url 'profile' username=user.username %}">Профиль</a>
   <a class="list-group-item d-flex align-items-center justify-content-between" href="{% url 'all_private_chat' %}">Сообщения<span class="badge bg-primary rounded-pill">14</span></a>
   <a class="list-group-item d-flex align-items-center justify-content-between" href="{% url 'list' %}">Друзья<span class="badge bg-primary rounded-pill">14</span></a>
-  <a class="list-group-item">Сообщества</a>
+  <a class="list-group-item" href="{% url 'groups' %}">Сообщества</a>
   <a class="list-group-item" href="{% url 'edit' %}">Настройки</a>
 </div>
