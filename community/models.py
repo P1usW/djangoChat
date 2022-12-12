@@ -39,6 +39,7 @@ class Post(models.Model):
     content = models.TextField(max_length=4098)
     timestamp = models.DateTimeField(auto_now_add=True)
     user_author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-                                    related_name='user_author', blank=True, null=True)
-    group_author = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='group_author')
+                                    related_name='user_post_author', blank=True, null=True)
+    group_author = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='group_post_author')
     group = models.ManyToManyField(Group, related_name='posts')
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='post_likes')

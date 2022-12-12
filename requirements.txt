@@ -12,12 +12,14 @@ daphne==3.0.2
 Deprecated==1.2.13
 Django==4.1.1
 django-debug-toolbar==3.7.0
+django-environ==0.9.0
 hyperlink==21.0.0
 idna==3.4
 incremental==21.3.0
 msgpack==1.0.4
 packaging==21.3
 Pillow==9.2.0
+psycopg2==2.9.5
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
